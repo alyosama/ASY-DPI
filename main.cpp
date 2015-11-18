@@ -6,88 +6,78 @@
 #include <EthLayer.h>
 #include <IPv6Layer.h>
 #include <UdpLayer.h>
+
+#include <Logger.h>
+#include <Packet.h>
+#include <EthLayer.h>
+#include <VlanLayer.h>
+#include <PayloadLayer.h>
+#include <IPv4Layer.h>
+#include <IPv6Layer.h>
+#include <ArpLayer.h>
+#include <UdpLayer.h>
+#include <TcpLayer.h>
+#include <HttpLayer.h>
+#include <PPPoELayer.h>
+#include <DnsLayer.h>
+#include <MplsLayer.h>
+#include <IpAddress.h>
+#include <fstream>
+#include <stdlib.h>
+#include <debug_new.h>
+#include <iostream>
+#include <sstream>
+#include <string.h>
 #ifdef WIN32
 #include <winsock2.h>
 #else
 #include <in.h>
 #endif
 
+
+#include <PcapLiveDeviceList.h>
+#include <PcapLiveDevice.h>
+
+
 using namespace std;
 
-int getFileLength(const char* filename)
+
+int count=0; void packetRecieved(RawPacket* rawPacket, PcapLiveDevice* pDevice,
+                                 void* userCookie)
 {
-    ifstream infile(filename, ifstream::binary);
-    if (!infile)
-        return -1;
-    infile.seekg(0, infile.end);
-    int length = infile.tellg();
-    infile.close();
-    return length;
-}
+    printf("packet received %d\n",count);
 
-/**
- * A method for reading a file in hex string format and converting it to byte array
- */
-uint8_t* readFileIntoBuffer(const char* filename, int& bufferLength)
-{
-    int fileLength = getFileLength(filename);
-    if (fileLength == -1)
-        return NULL;
 
-    ifstream infile(filename);
-    if (!infile)
-        return NULL;
-
-    bufferLength = fileLength/2 + 2;
-    uint8_t* result = new uint8_t[bufferLength];
-    int i = 0;
-    while (!infile.eof())
-    {
-        char byte[3];
-        infile.read(byte, 2);
-        result[i] = (uint8_t)strtol(byte, NULL, 16);
-        i++;
-    }
-    infile.close();
-    return result;
-}
-
-int main(int argc, char* argv[])
-{
-    printf("hello\n");
-    // Read file into buffer (byte array)
-    int bufferLength = 0;
-    uint8_t* buffer = readFileIntoBuffer("UdpPacket.dat", bufferLength);
-    if (buffer == NULL)
-    {
-        printf("Cannot read file!\n");
-        return 1;
-    }
-
-    // Convert the byte array into RawPacket
-    timeval time;
-    gettimeofday(&time, NULL);
-    RawPacket rawPacket((const uint8_t*)buffer, bufferLength, time, true);
-
-    Packet packet(&rawPacket);
-
+    ////parsing
+    Packet packet(rawPacket);
     // Print packet types
     printf("Packet is of type: ");
     if (packet.isPacketOfType(Ethernet))
-        printf("Ethernet ");
+    { printf("Ethernet ");
+        printf("Src MAC: %s\n", ((EthLayer*)packet.getFirstLayer())->getSourceMac().toString().c_str());}
+
     if (packet.isPacketOfType(IP))
-        printf("IP ");
+    { printf("IP ");
+    }
     if (packet.isPacketOfType(IPv4))
-        printf("IPv4 ");
+    {printf("IPv4 ");
+
+        printf("Dst IP: %s\n", packet.getLayerOfType<IPv4Layer>()->getDstIpAddress().toString().c_str());}
     if (packet.isPacketOfType(IPv6))
-        printf("IPv6 ");
+    {printf("IPv6 ");
+        printf("Dst IP: %s\n", packet.getLayerOfType<IPv6Layer>()->getDstIpAddress().toString().c_str());}
     if (packet.isPacketOfType(TCP))
-        printf("TCP ");
+    {printf("TCP ");
+    }
     if (packet.isPacketOfType(UDP))
-        printf("UDP ");
+    { printf("UDP ");
+        UdpLayer* udpLayer = packet.getLayerOfType<UdpLayer>();
+        printf("Port Dst: %d\n", ntohs(udpLayer->getUdpHeader()->portDst));}
     printf("\n");
 
-    // Access L2 fields
+
+    /*
+// Access L2 fields
     printf("Src MAC: %s\n", ((EthLayer*)packet.getFirstLayer())->getSourceMac().toString().c_str());
 
     // Access L3 fields
@@ -102,5 +92,38 @@ int main(int argc, char* argv[])
 
     Layer* payloadLayer=udpLayer->getNextLayer();
 
-    printf("Packet payload offset: %s\n", payloadLayer->toString().c_str());
+    printf("Packet payload offset: %s\n", payloadLayer->toString().c_str()); */
+
+
+    count++;
+}
+int main(int argc, char* argv[])
+{
+
+
+    printf("hello ankdjljd \n");
+    PcapLiveDevice* pIfaceDevice = PcapLiveDeviceList::getInstance().getPcapLiveDeviceByName("wlan0"); //change to any interface later
+
+
+    //Verifying interface is valid
+    if (pIfaceDevice == NULL)
+    {
+        printf("Cannot find interface. Exiting...\n");
+        exit(-1);
+    }
+
+    //Opening interface device
+    int c=0;
+    if (!pIfaceDevice->open())
+    {
+        printf("Cannot open interface. Exiting...\n");
+        exit(-1);
+    }
+    pIfaceDevice->startCapture(packetRecieved, NULL);
+
+    while(true){};
+    pIfaceDevice->close();
+
+
+
 }
