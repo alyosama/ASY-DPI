@@ -121,7 +121,7 @@ void readPacketsFromFile(string filename,RawPacketVector& packets, char* errorSt
     RawPacket rawPacket;
     while (readerDevice.getNextPacket(rawPacket))
     {
-        packets.pushBack(&rawPacket);
+        packets.pushBack(new RawPacket(rawPacket));
     }
     readerDevice.close();
 
