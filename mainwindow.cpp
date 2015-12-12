@@ -50,7 +50,7 @@ MainWindow::~MainWindow() {
     if(settingsDialog)
         delete settingsDialog;
 }
-
+int count=0;
 void printPacket(RawPacket* rawPacket){
 
     Packet packet(rawPacket);
@@ -59,7 +59,7 @@ void printPacket(RawPacket* rawPacket){
     printf("Packet is of type: ");
     if (packet.isPacketOfType(Ethernet))
     {
-        type<<"Ethernet";
+        //type<<"Ethernet";
         EthLayer* ethlayer= packet.getLayerOfType<EthLayer>();
         printf("Src MAC: %s\n", ethlayer->getSourceMac().toString().c_str());
         printf("Dst MAC: %s\n", ethlayer->getDestMac().toString().c_str());
@@ -69,7 +69,7 @@ void printPacket(RawPacket* rawPacket){
     {
         if (packet.isPacketOfType(IPv4))
         {
-            type<<"- IPv4 ";
+            //type<<"- IPv4 ";
             IPv4Layer* ipv4layer= packet.getLayerOfType<IPv4Layer>();
             printf("Dst IP: %s\n",ipv4layer->getDstIpAddress().toString().c_str());
             printf("Src IP: %s\n",ipv4layer->getSrcIpAddress().toString().c_str());
@@ -83,14 +83,14 @@ void printPacket(RawPacket* rawPacket){
     }
     if (packet.isPacketOfType(TCP))
     {
-        type<<"- TCP ";
+        //type<<"- TCP ";
         TcpLayer* tcpLayer = packet.getLayerOfType<TcpLayer>();
         printf("Port Dst: %d\n", ntohs(tcpLayer->getTcpHeader()->portDst));
         printf("Port Src: %d\n", ntohs(tcpLayer->getTcpHeader()->portSrc));
     }
     if (packet.isPacketOfType(UDP))
     {
-         type<<"- UDP ";
+        //type<<"- UDP ";
         UdpLayer* udpLayer = packet.getLayerOfType<UdpLayer>();
         printf("Port Dst: %d\n", ntohs(udpLayer->getUdpHeader()->portDst));
         printf("Port Src: %d\n", ntohs(udpLayer->getUdpHeader()->portSrc));
@@ -100,12 +100,11 @@ void printPacket(RawPacket* rawPacket){
 }
 
 
-int count=0;
+
 void packetRecieved(RawPacket* rawPacket, PcapLiveDevice* pDevice,void* userCookie)
 {
     printf("packet received %d\n",++count);
     printPacket(rawPacket);
-
 
 }
 void savePacketsToFile(const char* fileName,RawPacketVector& packets, char* errString)
@@ -173,7 +172,6 @@ void savePackets(PcapLiveDevice *pDevice,QString filename,int time){
     printf("End Saving %d Packets\n",capturedPackets.size());
 }
 
-
 void MainWindow::on_actionStart_Capture_triggered()
 {
     QMessageBox Msgbox;
@@ -184,7 +182,7 @@ void MainWindow::on_actionStart_Capture_triggered()
          Msgbox.exec();
          return;
     }
-
+    printf("\ndevice name: %s \n",pIfaceDevice->getName());
     //Opening interface device
     if (!pIfaceDevice->open())
     {
@@ -195,8 +193,6 @@ void MainWindow::on_actionStart_Capture_triggered()
 
     int time=settingsDialog->getCaptureTime();
     pIfaceDevice->startCapture(packetRecieved, NULL);
-    PCAP_SLEEP(time);
-    pIfaceDevice->stopCapture();
 }
 
 void MainWindow::on_actionSave_triggered()
@@ -218,11 +214,12 @@ void MainWindow::on_actionSave_triggered()
          return;
     }
     int time=settingsDialog->getCaptureTime();
+    pIfaceDevice->stopCapture();
 
     QString filename = QFileDialog::getSaveFileName(this, "Save file", "", ".pcap");
     if (!filename.isEmpty())
         savePackets(pIfaceDevice,filename,time);
-
+    count=0;
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -240,6 +237,16 @@ void MainWindow::on_actionSettings_triggered()
 
 }
 
-
-
-
+void MainWindow::on_actionStop_Capture_triggered()
+{
+    QMessageBox Msgbox;
+    PcapLiveDevice* pIfaceDevice=settingsDialog->getSelectedDevice();
+    if(!pIfaceDevice){
+         Msgbox.setText("Cannot find interface. \n"
+                        "Please Select Device...");
+         Msgbox.exec();
+         return;
+    }
+    pIfaceDevice->stopCapture();
+    count=0;
+}
