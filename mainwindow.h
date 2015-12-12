@@ -22,6 +22,8 @@ private slots:
     void on_actionOpen_triggered();
     void on_actionSettings_triggered();
 
+    void on_actionStop_Capture_triggered();
+
 private:
     Ui::MainWindow *ui;
     SettingsDialog *settingsDialog;
