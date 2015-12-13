@@ -15,7 +15,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
+    friend void packetRecieved(RawPacket* rawPacket, PcapLiveDevice* pDevice, void* userCookie);
 private slots:
     void on_actionStart_Capture_triggered();
     void on_actionSave_triggered();

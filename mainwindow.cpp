@@ -100,12 +100,19 @@ void printPacket(RawPacket* rawPacket){
 }
 
 
-
+//friend function, we will use userCookie in as the MainWindow object
 void packetRecieved(RawPacket* rawPacket, PcapLiveDevice* pDevice,void* userCookie)
 {
     printf("packet received %d\n",++count);
     printPacket(rawPacket);
+    MainWindow* win = (MainWindow*)userCookie;
+    int rowc = win->ui->tableWidget->rowCount();
+    win->ui->tableWidget->insertRow(rowc - 1);
+    QTableWidgetItem* qtwi;
+//    qtwi->setText("blabla1"); //this line shuts the window down after the first packet
+//    win->ui->tableWidget->setItem(rowc,1,qtwi);
 
+    // TODO: add the new packet data to the table or call some member function to do it.
 }
 void savePacketsToFile(const char* fileName,RawPacketVector& packets, char* errString)
 {
@@ -192,7 +199,8 @@ void MainWindow::on_actionStart_Capture_triggered()
     }
 
     int time=settingsDialog->getCaptureTime();
-    pIfaceDevice->startCapture(packetRecieved, NULL);
+    //user cookie (this) is passed to the packetRecieved as an object *void, read startcapture code documentation for more info
+    pIfaceDevice->startCapture(packetRecieved, this);
 }
 
 void MainWindow::on_actionSave_triggered()
