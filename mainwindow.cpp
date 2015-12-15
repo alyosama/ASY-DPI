@@ -107,10 +107,11 @@ void packetRecieved(RawPacket* rawPacket, PcapLiveDevice* pDevice,void* userCook
     printPacket(rawPacket);
     MainWindow* win = (MainWindow*)userCookie;
     int rowc = win->ui->tableWidget->rowCount();
-    win->ui->tableWidget->insertRow(rowc - 1);
-    QTableWidgetItem* qtwi;
-//    qtwi->setText("blabla1"); //this line shuts the window down after the first packet
-//    win->ui->tableWidget->setItem(rowc,1,qtwi);
+    win->ui->tableWidget->insertRow(rowc);
+    QTableWidgetItem* qtwi = new QTableWidgetItem("Test");
+    //qtwi->setText("blabla1"); //this line shuts the window down after the first packet
+    win->ui->tableWidget->setItem(rowc,1,qtwi);
+    //qtwi->~QTableWidgetItem();
 
     // TODO: add the new packet data to the table or call some member function to do it.
 }
