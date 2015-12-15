@@ -46,6 +46,7 @@
      <string>File</string>
     </property>
     <addaction name="actionStart_Capture"/>
+    <addaction name="actionStop_Capture"/>
     <addaction name="actionSave"/>
     <addaction name="actionOpen"/>
    </widget>
@@ -77,6 +78,11 @@
   <action name="actionSettings">
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionStop_Capture">
+   <property name="text">
+    <string>Stop Capture</string>
    </property>
   </action>
  </widget>
