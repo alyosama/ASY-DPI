@@ -28,7 +28,10 @@ private:
     Ui::MainWindow *ui;
     SettingsDialog *settingsDialog;
     QStringList m_TableHeader;
-
+    void readPackets(QString filename);
+    void savePackets(PcapLiveDevice *pDevice,QString filename,int time);
+    void readPacketsFromFile(QString filename,RawPacketVector& packets, char* errorString);
+    void savePacketsToFile(const char* fileName,RawPacketVector& packets, char* errString);
 
 
 };

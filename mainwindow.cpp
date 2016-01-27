@@ -169,7 +169,7 @@ void packetRecieved(RawPacket* rawPacket, PcapLiveDevice* pDevice,void* userCook
 
     // TODO: add the new packet data to the table or call some member function to do it.
 }
-void savePacketsToFile(const char* fileName,RawPacketVector& packets, char* errString)
+void MainWindow::savePacketsToFile(const char* fileName,RawPacketVector& packets, char* errString)
 {
     PcapFileWriterDevice writerDevice(fileName);
     if (!writerDevice.open())
@@ -186,7 +186,7 @@ void savePacketsToFile(const char* fileName,RawPacketVector& packets, char* errS
     writerDevice.close();
 }
 
-void readPacketsFromFile(QString filename,RawPacketVector& packets, char* errorString){
+void MainWindow::readPacketsFromFile(QString filename,RawPacketVector& packets, char* errorString){
 
     PcapFileReaderDevice readerDevice(filename.toStdString().c_str());
     if (!readerDevice.open())
@@ -203,26 +203,30 @@ void readPacketsFromFile(QString filename,RawPacketVector& packets, char* errorS
 
 }
 
-void readPackets(QString filename){
+void MainWindow::readPackets(QString filename){
 
-    printf("Start Reading Packets From %s\n",filename.toStdString().c_str());
+    //printf("Start Reading Packets From %s\n",filename.toStdString().c_str());
     char errorString[1000];
     LoggerPP::getInstance().setErrorString(errorString, 1000);
     RawPacketVector packets;
     readPacketsFromFile(filename,packets,errorString);
 
-    printf("Number of Packets found: %d\n", packets.size());
-    int i = 0;
+    //printf("Number of Packets found: %d\n", packets.size());
+
+
+
+  //  int i = 0;
     for (RawPacketVector::VectorIterator packetIter = packets.begin(); packetIter != packets.end(); packetIter++)
     {
-        printf("packet read %d\n",++i);
-        printPacket(*packetIter);
+        //printf("packet read %d\n",++i);
+        MainWindow::addPacketToTable(*packetIter,ui);
+        //printPacket(*packetIter);
     }
 
 
 }
 
-void savePackets(PcapLiveDevice *pDevice,QString filename,int time){
+void MainWindow::savePackets(PcapLiveDevice *pDevice,QString filename,int time){
     printf("Start Saving Packets at %s\n",filename.toStdString().c_str());
     char errorString[1000];
     LoggerPP::getInstance().setErrorString(errorString, 1000);
