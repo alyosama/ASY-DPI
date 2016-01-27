@@ -16,18 +16,20 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     friend void packetRecieved(RawPacket* rawPacket, PcapLiveDevice* pDevice, void* userCookie);
+    static void addPacketToTable(RawPacket *RawPacket,Ui::MainWindow *ui);
 private slots:
     void on_actionStart_Capture_triggered();
     void on_actionSave_triggered();
     void on_actionOpen_triggered();
     void on_actionSettings_triggered();
-
     void on_actionStop_Capture_triggered();
 
 private:
     Ui::MainWindow *ui;
     SettingsDialog *settingsDialog;
     QStringList m_TableHeader;
+
+
 
 };
 

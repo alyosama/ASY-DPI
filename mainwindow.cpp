@@ -50,6 +50,62 @@ MainWindow::~MainWindow() {
     if(settingsDialog)
         delete settingsDialog;
 }
+
+
+void MainWindow::addPacketToTable(RawPacket *rawPacket,Ui::MainWindow *ui){
+    int rowc = ui->tableWidget->rowCount();
+    ui->tableWidget->insertRow(rowc);
+    Packet packet(rawPacket);
+
+    ui->tableWidget->setItem(rowc,0,new QTableWidgetItem(QString::number(rowc)));
+
+    QString type="";
+
+    if (packet.isPacketOfType(Ethernet))
+    {
+        type+="Ethernet ";
+
+        EthLayer* ethlayer= packet.getLayerOfType<EthLayer>();
+        ui->tableWidget->setItem(rowc,2,new QTableWidgetItem(QString(ethlayer->getSourceMac().toString().c_str())));
+        ui->tableWidget->setItem(rowc,3,new QTableWidgetItem(QString(ethlayer->getDestMac().toString().c_str())));
+    }
+
+    if (packet.isPacketOfType(IP))
+    {
+        if (packet.isPacketOfType(IPv4))
+        {
+            type+="- IPv4 ";
+            IPv4Layer* ipv4layer= packet.getLayerOfType<IPv4Layer>();
+            ui->tableWidget->setItem(rowc,4,new QTableWidgetItem(QString(ipv4layer->getSrcIpAddress().toString().c_str())));
+            ui->tableWidget->setItem(rowc,5,new QTableWidgetItem(QString(ipv4layer->getDstIpAddress().toString().c_str())));
+        }
+        else if (packet.isPacketOfType(IPv6))
+        {
+            IPv6Layer* ipv6layer= packet.getLayerOfType<IPv6Layer>();
+            ui->tableWidget->setItem(rowc,4,new QTableWidgetItem(QString(ipv6layer->getSrcIpAddress().toString().c_str())));
+            ui->tableWidget->setItem(rowc,5,new QTableWidgetItem(QString(ipv6layer->getDstIpAddress().toString().c_str())));
+        }
+    }
+    if (packet.isPacketOfType(TCP))
+    {
+        type+="- TCP ";
+        TcpLayer* tcpLayer = packet.getLayerOfType<TcpLayer>();
+        ui->tableWidget->setItem(rowc,6,new QTableWidgetItem(QString::number(ntohs(tcpLayer->getTcpHeader()->portSrc))));
+        ui->tableWidget->setItem(rowc,7,new QTableWidgetItem(QString::number(ntohs(tcpLayer->getTcpHeader()->portDst))));
+    }
+    if (packet.isPacketOfType(UDP))
+    {
+        type+="- UDP ";
+        UdpLayer* udpLayer = packet.getLayerOfType<UdpLayer>();
+        ui->tableWidget->setItem(rowc,6,new QTableWidgetItem(QString::number(ntohs(udpLayer->getUdpHeader()->portSrc))));
+        ui->tableWidget->setItem(rowc,7,new QTableWidgetItem(QString::number(ntohs(udpLayer->getUdpHeader()->portDst))));
+
+    }
+
+   ui->tableWidget->setItem(rowc,1,new QTableWidgetItem(type));
+   ui->tableWidget->scrollToBottom();
+}
+
 int count=0;
 void printPacket(RawPacket* rawPacket){
 
@@ -103,14 +159,12 @@ void printPacket(RawPacket* rawPacket){
 //friend function, we will use userCookie in as the MainWindow object
 void packetRecieved(RawPacket* rawPacket, PcapLiveDevice* pDevice,void* userCookie)
 {
-    printf("packet received %d\n",++count);
-    printPacket(rawPacket);
+   // printf("packet received %d\n",++count);
+   // printPacket(rawPacket);
+
     MainWindow* win = (MainWindow*)userCookie;
-    int rowc = win->ui->tableWidget->rowCount();
-    win->ui->tableWidget->insertRow(rowc);
-    QTableWidgetItem* qtwi = new QTableWidgetItem("Test");
-    //qtwi->setText("blabla1"); //this line shuts the window down after the first packet
-    win->ui->tableWidget->setItem(rowc,1,qtwi);
+    MainWindow::addPacketToTable(rawPacket,win->ui);
+
     //qtwi->~QTableWidgetItem();
 
     // TODO: add the new packet data to the table or call some member function to do it.
