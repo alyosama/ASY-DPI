@@ -5,7 +5,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 SOURCES += main.cpp \
     mainwindow.cpp \
-    settingsdialog.cpp
+    settingsdialog.cpp \
+    stringmatch.cpp
 
 
 INCLUDEPATH+= $$PWD/../Libraries/PcapPlusPlus/Dist/header
@@ -15,6 +16,7 @@ LIBS+= -static-libstdc++
 LIBS+=-L$$PWD/../Libraries/PcapPlusPlus/Dist  -lPcap++ -lPacket++ -lCommon++
 LIBS+= -lpcap -lpthread
 
+CONFIG += c++11
 
 DESTDIR= build
 
@@ -29,5 +31,6 @@ HEADERS += \
     mainwindow.h \
     packetcapture.h \
     settingsdialog.h \
-    common.h
+    common.h \
+    stringmatch.h
 

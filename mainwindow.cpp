@@ -25,6 +25,7 @@
 #include <PlatformSpecificUtils.h>
 #include <PcapFileDevice.h>
 #include <cstdlib>
+#include<iostream>
 #ifdef WIN32
 #include <winsock2.h>
 #else
@@ -34,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
   settingsDialog=NULL;
-
+  sm = new StringMatch();
   ui->tableWidget->setColumnCount(8);
   m_TableHeader<<"#"<<"Type"<<"Mac Source"<<"Mac Dist"<<"IP Source"<<"IP Dist"<<"TCP/UDP Source"<<"TCP/UDP Dist";
   ui->tableWidget->setHorizontalHeaderLabels(m_TableHeader);
@@ -52,7 +53,8 @@ MainWindow::~MainWindow() {
 }
 
 
-void MainWindow::addPacketToTable(RawPacket *rawPacket,Ui::MainWindow *ui){
+void MainWindow::addPacketToTable(RawPacket *rawPacket,MainWindow* win){
+    Ui::MainWindow *ui = win->ui;
     int rowc = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(rowc);
     Packet packet(rawPacket);
@@ -101,12 +103,16 @@ void MainWindow::addPacketToTable(RawPacket *rawPacket,Ui::MainWindow *ui){
         ui->tableWidget->setItem(rowc,7,new QTableWidgetItem(QString::number(ntohs(udpLayer->getUdpHeader()->portDst))));
 
     }
-
    ui->tableWidget->setItem(rowc,1,new QTableWidgetItem(type));
+   if(win->sm->matchPacket(rawPacket))
+   {
+       for(int i=0;i<8;i++)
+           ui->tableWidget->item(rowc,i)->setBackground(Qt::red);
+   }
    ui->tableWidget->scrollToBottom();
 }
 
-int count=0;
+
 void printPacket(RawPacket* rawPacket){
 
     Packet packet(rawPacket);
@@ -161,9 +167,8 @@ void packetRecieved(RawPacket* rawPacket, PcapLiveDevice* pDevice,void* userCook
 {
    // printf("packet received %d\n",++count);
    // printPacket(rawPacket);
-
     MainWindow* win = (MainWindow*)userCookie;
-    MainWindow::addPacketToTable(rawPacket,win->ui);
+    MainWindow::addPacketToTable(rawPacket,win);
 
     //qtwi->~QTableWidgetItem();
 
@@ -219,7 +224,7 @@ void MainWindow::readPackets(QString filename){
     for (RawPacketVector::VectorIterator packetIter = packets.begin(); packetIter != packets.end(); packetIter++)
     {
         //printf("packet read %d\n",++i);
-        MainWindow::addPacketToTable(*packetIter,ui);
+        MainWindow::addPacketToTable(*packetIter,this);
         //printPacket(*packetIter);
     }
 
