@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
   settingsDialog=NULL;
   sm = new StringMatch();
+  stat = new statistics();
   ui->tableWidget->setColumnCount(8);
   m_TableHeader<<"#"<<"Type"<<"Mac Source"<<"Mac Dist"<<"IP Source"<<"IP Dist"<<"TCP/UDP Source"<<"TCP/UDP Dist";
   ui->tableWidget->setHorizontalHeaderLabels(m_TableHeader);
@@ -58,7 +59,6 @@ void MainWindow::addPacketToTable(RawPacket *rawPacket,MainWindow* win){
     int rowc = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(rowc);
     Packet packet(rawPacket);
-
     ui->tableWidget->setItem(rowc,0,new QTableWidgetItem(QString::number(rowc)));
 
     QString type="";
@@ -169,9 +169,9 @@ void packetRecieved(RawPacket* rawPacket, PcapLiveDevice* pDevice,void* userCook
    // printPacket(rawPacket);
     MainWindow* win = (MainWindow*)userCookie;
     MainWindow::addPacketToTable(rawPacket,win);
-
+    //stat(rawPacket);
     //qtwi->~QTableWidgetItem();
-
+    win->stat->check(rawPacket);
     // TODO: add the new packet data to the table or call some member function to do it.
 }
 void MainWindow::savePacketsToFile(const char* fileName,RawPacketVector& packets, char* errString)
@@ -226,6 +226,7 @@ void MainWindow::readPackets(QString filename){
         //printf("packet read %d\n",++i);
         MainWindow::addPacketToTable(*packetIter,this);
         //printPacket(*packetIter);
+        stat->check(*packetIter);
     }
 
 
@@ -299,7 +300,7 @@ void MainWindow::on_actionOpen_triggered()
     QString filename = QFileDialog::getOpenFileName(this, tr("Open File..."),
                                                  QString(), tr("Raw Packets (*.pcap);;All Files (*)"));
     if (!filename.isEmpty())
-     readPackets(filename);
+     readPackets(filename); stat->openStatisticsDialog();
 }
 
 void MainWindow::on_actionSettings_triggered()
@@ -318,7 +319,7 @@ void MainWindow::on_actionStop_Capture_triggered()
                         "Please Select Device...");
          Msgbox.exec();
          return;
-    }
+    }   stat->openStatisticsDialog();
     pIfaceDevice->stopCapture();
     count=0;
 }

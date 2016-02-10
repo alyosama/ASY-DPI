@@ -6,7 +6,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 SOURCES += main.cpp \
     mainwindow.cpp \
     settingsdialog.cpp \
-    stringmatch.cpp
+    stringmatch.cpp \
+    statistics.cpp \
+    statisticsdialog.cpp
 
 
 INCLUDEPATH+= $$PWD/../Libraries/PcapPlusPlus/Dist/header
@@ -25,12 +27,15 @@ qtcAddDeployment()
 
 FORMS += \
     mainwindow.ui \
-    settingsdialog.ui
+    settingsdialog.ui \
+    statisticsdialog.ui
 
 HEADERS += \
     mainwindow.h \
     packetcapture.h \
     settingsdialog.h \
     common.h \
-    stringmatch.h
+    stringmatch.h \
+    statistics.h \
+    statisticsdialog.h
 

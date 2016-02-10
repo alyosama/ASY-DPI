@@ -46,7 +46,7 @@ void StringMatch::construct_f()
         }
     }
     while (!q.empty())
-    {cout<<q.size()<<" ";
+    {
         int r = q.front();
         q.pop();
         it = go_to[r].begin();

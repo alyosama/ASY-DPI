@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "settingsdialog.h"
 #include "stringmatch.h"
+#include "statistics.h"
 
 namespace Ui {
 class MainWindow;
@@ -19,7 +20,7 @@ public:
     friend void packetRecieved(RawPacket* rawPacket, PcapLiveDevice* pDevice, void* userCookie);
     static void addPacketToTable(RawPacket *RawPacket,MainWindow *win);
     StringMatch *sm;
-
+    statistics *stat;
 private slots:
     void on_actionStart_Capture_triggered();
     void on_actionSave_triggered();
