@@ -300,7 +300,9 @@ void MainWindow::on_actionOpen_triggered()
     QString filename = QFileDialog::getOpenFileName(this, tr("Open File..."),
                                                  QString(), tr("Raw Packets (*.pcap);;All Files (*)"));
     if (!filename.isEmpty())
-     readPackets(filename); stat->openStatisticsDialog();
+     readPackets(filename);
+
+    stat->openStatisticsDialog();
 }
 
 void MainWindow::on_actionSettings_triggered()
@@ -319,7 +321,8 @@ void MainWindow::on_actionStop_Capture_triggered()
                         "Please Select Device...");
          Msgbox.exec();
          return;
-    }   stat->openStatisticsDialog();
+    }
+    stat->openStatisticsDialog();
     pIfaceDevice->stopCapture();
     count=0;
 }
